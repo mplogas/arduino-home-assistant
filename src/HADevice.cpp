@@ -59,6 +59,27 @@ bool HADevice::setUniqueId(const byte* uniqueId, const uint16_t length)
     return true;
 }
 
+bool HADevice::setUniqueId(const char* uniqueId)
+{
+    if (_uniqueId) {
+        return false; // unique ID cannot be changed at runtime once it's set
+    }
+
+    size_t length = strlen(uniqueId) + 1;
+    char* dst = new char[length];
+    strncpy(dst, uniqueId, length - 1);
+    dst[length - 1] = '\0'; // Ensure null termination
+    _uniqueId = dst;
+
+    // char* dst = new char[strlen(uniqueId) + 1]; // include null terminator
+    // strcpy(dst, uniqueId);
+    // _uniqueId = dst;
+
+    _ownsUniqueId = true;
+    _serializer->set(AHATOFSTR(HADeviceIdentifiersProperty), _uniqueId);
+    return true;
+}
+
 void HADevice::setManufacturer(const char* manufacturer)
 {
     _serializer->set(AHATOFSTR(HADeviceManufacturerProperty), manufacturer);
